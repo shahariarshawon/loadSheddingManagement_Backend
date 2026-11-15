@@ -1,6 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma.js';
 import { sendSuccess } from '../utils/response.js';
+import authRouter from '../modules/auth/auth.routes.js';
+import userRouter from '../modules/user/user.routes.js';
+import adminRouter from '../modules/admin/admin.routes.js';
 
 const apiRouter = Router();
 
@@ -24,5 +27,10 @@ apiRouter.get('/health', async (_req: Request, res: Response, next: NextFunction
     return next(error);
   }
 });
+
+// Phase 3 Modules
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/users', userRouter);
+apiRouter.use('/admin', adminRouter);
 
 export default apiRouter;
