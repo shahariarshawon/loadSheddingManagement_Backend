@@ -26,11 +26,30 @@ app.use(
   }),
 );
 
-// Rate Limiting
-app.use('/api', apiRateLimiter);
+// Rate Limiting (exempt webhooks from strict rate limiting so Stripe retries are never blocked)
+app.use('/api', (req, res, next) => {
+  if (req.originalUrl.includes('/payments/webhook')) {
+    return next();
+  }
+  return apiRateLimiter(req, res, next);
+});
 
-// Body Parsing
-app.use(express.json({ limit: '10mb' }));
+// Stripe Webhook Raw Body Middleware:
+// Stripe webhook signature verification requires the original, unaltered raw request buffer.
+app.use(
+  '/api/v1/payments/webhook',
+  express.raw({ type: 'application/json' }),
+);
+
+// Body Parsing for all JSON and form endpoints
+app.use(
+  express.json({
+    limit: '10mb',
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Root Welcome Route
