@@ -733,6 +733,108 @@
           }
         }
       ]
+    },
+    {
+      "name": "14. Stripe Payments",
+      "item": [
+        {
+          "name": "Create Stripe Checkout Session (Customer)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payments/checkout",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"MONTHLY_PRIORITY\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Payments (Customer)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments/my?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Get Payment Status by Session ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments/status/:sessionId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Get Single Payment by ID (Customer / Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments/:paymentId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "List All Platform Payments (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments?page=1&limit=20&sortBy=createdAt&sortOrder=desc",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Stripe Webhook (Verified via stripe-signature header)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/payments/webhook",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "stripe-signature", "value": "t=TIMESTAMP,v1=SIGNATURE" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_test_sample\",\n  \"type\": \"checkout.session.completed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Success Redirect Endpoint",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments/success?session_id={{sessionId}}"
+          }
+        },
+        {
+          "name": "Cancel Redirect Endpoint",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/payments/cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Premium Feature Management",
+      "item": [
+        {
+          "name": "Get Premium Subscription Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/premium/status",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Get Premium Area Reliability Analytics",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/premium/area-analytics?areaId={{areaId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        }
+      ]
     }
   ]
 }
