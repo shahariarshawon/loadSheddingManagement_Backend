@@ -2,7 +2,7 @@ import app from './app.js';
 import { env } from './config/env.js';
 import { prisma } from './config/prisma.js';
 
-const server = app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, '0.0.0.0', () => {
   console.log(`⚡ GridWatch API server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
   console.log(`🏥 Health check: http://localhost:${env.PORT}/api/v1/health`);
 });

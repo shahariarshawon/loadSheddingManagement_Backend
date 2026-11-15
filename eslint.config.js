@@ -2,7 +2,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['node_modules/**', 'dist/**', 'prisma/**'],
+    ignores: ['node_modules/**', 'dist/**', 'prisma/**', 'src/generated/**'],
   },
   ...tseslint.configs.recommended,
   {
