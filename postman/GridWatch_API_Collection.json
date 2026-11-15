@@ -1,0 +1,488 @@
+{
+  "info": {
+    "name": "GridWatch API - Load Shedding & Power Management System",
+    "_postman_id": "a987d6e5-4321-4fba-b123-9876543210ab",
+    "description": "Comprehensive Postman collection for GridWatch REST API covering Auth, RBAC, Distribution Network, and Planned Load Shedding Outages.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "operatorToken", "value": "", "type": "string" },
+    { "key": "customerToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Server",
+      "item": [
+        {
+          "name": "Health Check (DB Verification)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tariq Rahman\",\n  \"email\": \"tariq@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"phone\": \"+8801700000001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Customer",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@gridwatch.com\",\n  \"password\": \"User123!Secure\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Operator",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"operator@gridwatch.com\",\n  \"password\": \"User123!Secure\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gridwatch.com\",\n  \"password\": \"Admin123!Secure\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Google Social Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/google",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"VALID_GOOGLE_ID_TOKEN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token Rotation",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/refresh-token",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"VALID_REFRESH_TOKEN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/logout",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"VALID_REFRESH_TOKEN\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. User Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/users/me",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tariq Rahman Updated\",\n  \"phone\": \"+8801711122233\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Admin User Management",
+      "item": [
+        {
+          "name": "List Users (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/users?page=1&limit=10&role=CUSTOMER",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        },
+        {
+          "name": "Update User Role (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/admin/users/:userId/role",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"POWER_OPERATOR\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update User Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/admin/users/:userId/status",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Distribution Zones",
+      "item": [
+        {
+          "name": "List Zones",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/zones?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get Zone by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/zones/:zoneId"
+          }
+        },
+        {
+          "name": "Create Zone (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/zones",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chittagong Coastal Distribution Zone\",\n  \"code\": \"ZONE-CTG-COAST\",\n  \"description\": \"Coastal power supply grid\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Zone (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/zones/:zoneId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated zone description\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Zone (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/zones/:zoneId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Substations",
+      "item": [
+        {
+          "name": "List Substations",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/substations?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get Substation by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/substations/:substationId"
+          }
+        },
+        {
+          "name": "Create Substation (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/substations",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Agrabad 132/33kV Grid Substation\",\n  \"code\": \"SUB-AGR-01\",\n  \"zoneId\": \"ZONE_UUID\",\n  \"capacityKva\": 75000\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Substation (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/substations/:substationId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"capacityKva\": 80000\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Substation (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/substations/:substationId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Feeders",
+      "item": [
+        {
+          "name": "List Feeders",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/feeders?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get Feeder by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/feeders/:feederId"
+          }
+        },
+        {
+          "name": "Create Feeder (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/feeders",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Agrabad Commercial Feeder 01\",\n  \"code\": \"FDR-AGR-COM-01\",\n  \"substationId\": \"SUBSTATION_UUID\",\n  \"maxLoadKw\": 12000\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Feeder (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/feeders/:feederId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maxLoadKw\": 14000\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Feeder (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/feeders/:feederId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Areas",
+      "item": [
+        {
+          "name": "List Areas (Search & Filter)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/areas?search=Gulshan&page=1&limit=10"
+          }
+        },
+        {
+          "name": "Get Area by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/areas/:areaId"
+          }
+        },
+        {
+          "name": "Create Area (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/areas",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Agrabad C/A Sector 2\",\n  \"postalCode\": \"4100\",\n  \"feederId\": \"FEEDER_UUID\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Area (Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/areas/:areaId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postalCode\": \"4101\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Area (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/areas/:areaId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Planned Outages",
+      "item": [
+        {
+          "name": "Create Outage Schedule (Operator / Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/outages",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Gulshan-2 Scheduled Grid Maintenance\",\n  \"description\": \"Routine line maintenance and load balance\",\n  \"areaId\": \"AREA_UUID\",\n  \"startTime\": \"2026-11-20T10:00:00.000Z\",\n  \"endTime\": \"2026-11-20T12:00:00.000Z\",\n  \"type\": \"PLANNED\",\n  \"status\": \"PUBLISHED\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Outages (Filter by Area, Status, Date)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outages?areaId=AREA_UUID&status=PUBLISHED&page=1&limit=10&sortBy=startTime&sortOrder=asc"
+          }
+        },
+        {
+          "name": "Get Outage by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outages/:outageId"
+          }
+        },
+        {
+          "name": "Update Outage Schedule (Operator / Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/outages/:outageId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Scheduled Maintenance Title\",\n  \"description\": \"Extended maintenance details\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cancel Outage Schedule (Operator / Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/outages/:outageId/cancel",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Grid load normalized, maintenance postponed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Outage Schedule (Operator / Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/outages/:outageId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{operatorToken}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}
