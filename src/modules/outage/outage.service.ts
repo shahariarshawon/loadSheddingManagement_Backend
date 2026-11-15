@@ -59,7 +59,7 @@ export class OutageService {
   }
 
   /**
-   * Create a planned load-shedding schedule with conflict validation
+   * Create a planned load-shedding schedule with concurrency-safe conflict validation
    */
   static async createOutage(
     userId: string,
@@ -77,15 +77,45 @@ export class OutageService {
     const startDateTime = new Date(input.startTime);
     const endDateTime = new Date(input.endTime);
 
-    // Validate schedule conflicts
-    await this.checkScheduleConflict(input.areaId, startDateTime, endDateTime);
-
     const datePrefix = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const outageNumber = `OUT-PLN-${datePrefix}-${randomSuffix}`;
 
-    const [outage] = await prisma.$transaction([
-      prisma.outage.create({
+    const outage = await prisma.$transaction(async (tx) => {
+      // Transaction-scoped advisory lock on target area to serialize concurrent schedule checks
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'outage_schedule_' + input.areaId}))`;
+
+      // Check for overlapping outage schedules in this area inside the lock
+      const conflicting = await tx.outage.findFirst({
+        where: {
+          areaId: input.areaId,
+          deletedAt: null,
+          status: {
+            notIn: [OutageStatus.CANCELLED, OutageStatus.COMPLETED],
+          },
+          AND: [
+            { startTime: { lt: endDateTime } },
+            {
+              OR: [
+                { endTime: null },
+                { endTime: { gt: startDateTime } },
+              ],
+            },
+          ],
+        },
+        include: {
+          area: { select: { name: true } },
+        },
+      });
+
+      if (conflicting) {
+        const endStr = conflicting.endTime ? conflicting.endTime.toISOString() : 'indefinite';
+        throw AppError.conflict(
+          `Scheduling Conflict: An overlapping outage ('${conflicting.title}', #${conflicting.outageNumber}) is already scheduled for area '${conflicting.area.name}' between ${conflicting.startTime.toISOString()} and ${endStr}.`,
+        );
+      }
+
+      const created = await tx.outage.create({
         data: {
           outageNumber,
           title: input.title,
@@ -122,12 +152,14 @@ export class OutageService {
           },
           createdBy: { select: { id: true, name: true, email: true, role: true } },
         },
-      }),
-      prisma.auditLog.create({
+      });
+
+      await tx.auditLog.create({
         data: {
           userId,
           action: 'OUTAGE_SCHEDULE_CREATED',
           entity: 'Outage',
+          entityId: created.id,
           details: {
             outageNumber,
             title: input.title,
@@ -137,8 +169,10 @@ export class OutageService {
           },
           ipAddress: ipAddress || null,
         },
-      }),
-    ]);
+      });
+
+      return created;
+    });
 
     return outage;
   }
@@ -463,37 +497,40 @@ export class OutageService {
       );
     }
 
-    const technician = await prisma.technician.findFirst({
-      where: { id: input.technicianId, deletedAt: null },
-    });
-
-    if (!technician) {
-      throw AppError.notFound(`Technician with ID '${input.technicianId}' not found.`);
-    }
-
-    if (!technician.isAvailable) {
-      throw AppError.conflict(
-        `Technician '${technician.name}' is currently unavailable or assigned to another active outage.`,
-      );
-    }
-
-    // Double assignment guard: Verify no ongoing active assignment
-    const activeAssignment = await prisma.technicianAssignment.findFirst({
-      where: {
-        technicianId: input.technicianId,
-        status: {
-          in: [AssignmentStatus.ASSIGNED, AssignmentStatus.IN_PROGRESS],
-        },
-      },
-    });
-
-    if (activeAssignment) {
-      throw AppError.conflict(
-        `Technician '${technician.name}' already has an active ongoing assignment.`,
-      );
-    }
-
     const result = await prisma.$transaction(async (tx) => {
+      // Transaction-scoped advisory lock on technician to serialize concurrent assignments for this technician
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'technician_assignment_' + input.technicianId}))`;
+
+      const technician = await tx.technician.findFirst({
+        where: { id: input.technicianId, deletedAt: null },
+      });
+
+      if (!technician) {
+        throw AppError.notFound(`Technician with ID '${input.technicianId}' not found.`);
+      }
+
+      if (!technician.isAvailable) {
+        throw AppError.conflict(
+          `Technician '${technician.name}' is currently unavailable or assigned to another active outage.`,
+        );
+      }
+
+      // Double assignment guard: Verify no ongoing active assignment inside the transaction lock
+      const activeAssignment = await tx.technicianAssignment.findFirst({
+        where: {
+          technicianId: input.technicianId,
+          status: {
+            in: [AssignmentStatus.ASSIGNED, AssignmentStatus.IN_PROGRESS],
+          },
+        },
+      });
+
+      if (activeAssignment) {
+        throw AppError.conflict(
+          `Technician '${technician.name}' already has an active ongoing assignment.`,
+        );
+      }
+
       // Create assignment
       const assignment = await tx.technicianAssignment.create({
         data: {
