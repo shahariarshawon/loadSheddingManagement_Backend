@@ -2,7 +2,20 @@ import { z } from 'zod';
 import { SubscriptionPlan, PaymentStatus } from '../../generated/prisma/client.js';
 
 export const createCheckoutSchema = z.object({
-  plan: z.nativeEnum(SubscriptionPlan).default(SubscriptionPlan.MONTHLY_PRIORITY),
+  plan: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val || val === 'PREMIUM_MONTHLY' || val === 'MONTHLY') {
+        return SubscriptionPlan.MONTHLY_PRIORITY;
+      }
+      if (val === 'ANNUAL' || val === 'PREMIUM_ANNUAL') {
+        return SubscriptionPlan.ANNUAL_PRIORITY;
+      }
+      return val as SubscriptionPlan;
+    })
+    .pipe(z.nativeEnum(SubscriptionPlan))
+    .default(SubscriptionPlan.MONTHLY_PRIORITY),
 });
 
 export const paymentFilterSchema = z.object({

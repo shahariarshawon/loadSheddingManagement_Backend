@@ -8,14 +8,14 @@ export const createSubstationSchema = z.object({
     .min(2, 'Substation code must be at least 2 characters')
     .max(50)
     .toUpperCase(),
-  zoneId: z.string().uuid('Valid Zone ID is required'),
+  zoneId: z.string().trim().min(1, 'Valid Zone ID is required'),
   capacityKva: z.number().positive('Capacity must be a positive number').optional(),
 });
 
 export const updateSubstationSchema = z.object({
   name: z.string().trim().min(2).max(100).optional(),
   code: z.string().trim().min(2).max(50).toUpperCase().optional(),
-  zoneId: z.string().uuid('Valid Zone ID is required').optional(),
+  zoneId: z.string().trim().min(1, 'Valid Zone ID is required').optional(),
   capacityKva: z.number().positive().optional(),
 });
 

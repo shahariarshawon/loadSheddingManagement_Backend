@@ -30,7 +30,7 @@ export const listAuditLogsQuerySchema = z.object({
   limit: z.string().optional().transform((val) => (val ? Math.min(100, Math.max(1, parseInt(val, 10))) : 20)),
   action: z.string().trim().optional(),
   entity: z.string().trim().optional(),
-  userId: z.string().uuid().optional(),
+  userId: z.string().trim().min(1).optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
   search: z.string().trim().optional(),

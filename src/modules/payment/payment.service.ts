@@ -121,6 +121,7 @@ export class PaymentService {
       return {
         paymentId: payment.id,
         checkoutUrl: session.url,
+        url: session.url,
         sessionId: session.id,
         amount: planDetails.amountInDollars,
         currency: 'USD',

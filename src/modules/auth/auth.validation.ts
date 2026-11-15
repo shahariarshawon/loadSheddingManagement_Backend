@@ -5,7 +5,7 @@ export const registerSchema = z.object({
   email: z.string().trim().toLowerCase().email('Invalid email address').max(100),
   password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password must be under 100 characters'),
   phone: z.string().trim().max(20).optional(),
-  areaId: z.string().uuid('Invalid area ID format').optional(),
+  areaId: z.string().trim().min(1, 'Area ID must not be empty').optional(),
 });
 
 export const loginSchema = z.object({

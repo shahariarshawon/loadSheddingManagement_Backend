@@ -831,9 +831,11 @@ export const openApiSpec = {
                   title: { type: 'string', example: 'Winter Feeder Overhaul' },
                   description: { type: 'string', example: 'Preventative transformer breaker servicing.' },
                   outageType: { type: 'string', enum: ['PLANNED', 'EMERGENCY', 'UNPLANNED'], default: 'PLANNED' },
+                  type: { type: 'string', enum: ['PLANNED', 'EMERGENCY', 'UNPLANNED'], default: 'PLANNED' },
                   areaId: { type: 'string', example: 'area-gulshan-2-c' },
                   startTime: { type: 'string', format: 'date-time', example: '2026-12-01T08:00:00.000Z' },
                   estimatedEndTime: { type: 'string', format: 'date-time', example: '2026-12-01T12:00:00.000Z' },
+                  endTime: { type: 'string', format: 'date-time', example: '2026-12-01T12:00:00.000Z' },
                 },
               },
             },
@@ -1268,7 +1270,12 @@ export const openApiSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  plan: { type: 'string', example: 'PREMIUM_MONTHLY' },
+                  plan: {
+                    type: 'string',
+                    enum: ['MONTHLY_PRIORITY', 'ANNUAL_PRIORITY'],
+                    default: 'MONTHLY_PRIORITY',
+                    example: 'MONTHLY_PRIORITY',
+                  },
                 },
               },
             },
