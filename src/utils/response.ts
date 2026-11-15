@@ -3,7 +3,7 @@ import { Response } from 'express';
 interface SuccessResponseOptions<T> {
   message?: string;
   data?: T;
-  meta?: Record<string, unknown>;
+  meta?: unknown;
 }
 
 export function sendSuccess<T>(
