@@ -483,6 +483,256 @@
           }
         }
       ]
+    },
+    {
+      "name": "10. Outage Workflows & Operations",
+      "item": [
+        {
+          "name": "Assign Technician to Outage (Operator / Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/outages/:outageId/assign",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technicianId\": \"TECHNICIAN_UUID\",\n  \"notes\": \"Investigate damaged step-down transformer and replace blown fuses.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Outage Technician Assignments",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outages/:outageId/assignments",
+            "header": [{ "key": "Authorization", "value": "Bearer {{operatorToken}}" }]
+          }
+        },
+        {
+          "name": "Update Repair Progress (Operator / Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/outages/:outageId/progress",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repairNotes\": \"Transformer coil replaced. Testing line insulation before energizing.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Restore Outage (Operator / Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/outages/:outageId/restore",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Substation circuit breaker closed. Grid voltage stabilized at 230V.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Outage History Timeline",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outages/:outageId/history"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Customer Outage Reports",
+      "item": [
+        {
+          "name": "Submit Outage Report (Customer)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/outage-reports",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"areaId\": \"AREA_UUID\",\n  \"title\": \"Transformer Sparking and Total Blackout\",\n  \"description\": \"Loud noise heard from transformer, followed by complete blackout across Block C.\",\n  \"severity\": \"HIGH\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Outage Reports (Customer)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outage-reports/my?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Get Outage Report by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outage-reports/:reportId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Update Pending Report (Customer)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/outage-reports/:reportId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated details regarding transformer sparks\",\n  \"severity\": \"CRITICAL\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Withdraw Pending Report (Customer)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/outage-reports/:reportId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "List All Outage Reports (Operator / Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/outage-reports?status=PENDING&page=1&limit=10",
+            "header": [{ "key": "Authorization", "value": "Bearer {{operatorToken}}" }]
+          }
+        },
+        {
+          "name": "Verify Outage Report (Operator / Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/outage-reports/:reportId/verify",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Emergency: Transformer Explosion in Block C\",\n  \"estimatedRestoreTime\": \"2026-11-15T18:00:00.000Z\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reject Outage Report (Operator / Admin)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/outage-reports/:reportId/reject",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Internal consumer premises issue. Grid supply is operating normally.\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Technician Management",
+      "item": [
+        {
+          "name": "List Technicians (Filter by Zone, Availability)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/technicians?isAvailable=true&page=1&limit=10",
+            "header": [{ "key": "Authorization", "value": "Bearer {{operatorToken}}" }]
+          }
+        },
+        {
+          "name": "Get Technician by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/technicians/:technicianId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{operatorToken}}" }]
+          }
+        },
+        {
+          "name": "Create Technician (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/technicians",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kabir Hossain\",\n  \"phone\": \"+8801811223344\",\n  \"specialization\": \"Substation Line Maintenance\",\n  \"zoneId\": \"ZONE_UUID\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Technician (Admin / Operator)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/technicians/:technicianId",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{operatorToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": true,\n  \"specialization\": \"High-Voltage Transformers & Switchgear\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Technician (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/technicians/:technicianId",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. In-App Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/notifications?page=1&limit=20",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/notifications/:notificationId/read",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/notifications/read-all",
+            "header": [{ "key": "Authorization", "value": "Bearer {{customerToken}}" }]
+          }
+        }
+      ]
     }
   ]
 }
