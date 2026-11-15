@@ -6,6 +6,7 @@ const testSuites = [
   { name: 'Phase 5: Reports, Technicians & Restoration', file: 'scripts/test-phase5.ts' },
   { name: 'Phase 6: Stripe Payments & Premium Feature', file: 'scripts/test-phase6.ts' },
   { name: 'Phase 7: Validation, Concurrency & Admin Stats', file: 'scripts/test-phase7.ts' },
+  { name: 'Phase 8: Swagger Documentation & Production Readiness', file: 'scripts/test-phase8-docs.ts' },
 ];
 
 async function runSuite(suite: { name: string; file: string }): Promise<{ success: boolean; durationMs: number }> {
