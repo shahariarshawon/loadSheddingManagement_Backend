@@ -10,6 +10,9 @@ import { sendSuccess } from './utils/response.js';
 
 const app: Application = express();
 
+// Trust proxy for Render reverse proxy rate-limiting
+app.set('trust proxy', 1);
+
 // Security Headers
 app.use(helmet());
 
