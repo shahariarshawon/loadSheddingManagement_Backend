@@ -68,6 +68,7 @@ enum PaymentStatus {
   PENDING
   SUCCEEDED
   FAILED
+  CANCELLED
 }
 
 // ----------------------------------------------------
@@ -308,6 +309,7 @@ model Payment {
   currency              String        @default("USD")
   status                PaymentStatus @default(PENDING)
   metadata              Json?
+  paidAt                DateTime?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
 
@@ -349,4 +351,12 @@ model Notification {
   @@index([userId, isRead])
   @@index([createdAt])
   @@map("notifications")
+}
+
+model ProcessedWebhookEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
+
+  @@map("processed_webhook_events")
 }
