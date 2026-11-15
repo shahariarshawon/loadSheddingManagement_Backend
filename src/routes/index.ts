@@ -9,6 +9,9 @@ import substationRouter from '../modules/substation/substation.routes.js';
 import feederRouter from '../modules/feeder/feeder.routes.js';
 import areaRouter from '../modules/area/area.routes.js';
 import outageRouter from '../modules/outage/outage.routes.js';
+import outageReportRouter from '../modules/outageReport/outageReport.routes.js';
+import technicianRouter from '../modules/technician/technician.routes.js';
+import notificationRouter from '../modules/notification/notification.routes.js';
 
 const apiRouter = Router();
 
@@ -33,16 +36,21 @@ apiRouter.get('/health', async (_req: Request, res: Response, next: NextFunction
   }
 });
 
-// Phase 3 Modules
+// Phase 3 Modules: Authentication, User & Administration
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', userRouter);
 apiRouter.use('/admin', adminRouter);
 
-// Phase 4 Modules
+// Phase 4 Modules: Power Distribution Network & Outage Schedules
 apiRouter.use('/zones', zoneRouter);
 apiRouter.use('/substations', substationRouter);
 apiRouter.use('/feeders', feederRouter);
 apiRouter.use('/areas', areaRouter);
 apiRouter.use('/outages', outageRouter);
+
+// Phase 5 Modules: Customer Outage Reports, Technician Management & Notifications
+apiRouter.use('/outage-reports', outageReportRouter);
+apiRouter.use('/technicians', technicianRouter);
+apiRouter.use('/notifications', notificationRouter);
 
 export default apiRouter;

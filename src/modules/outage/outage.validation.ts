@@ -46,6 +46,24 @@ export const cancelOutageSchema = z.object({
     .max(500),
 });
 
+export const assignTechnicianSchema = z.object({
+  technicianId: z.string({ message: 'Technician ID is required' }).uuid({ message: 'Invalid Technician UUID' }),
+  notes: z.string().trim().max(1000).optional(),
+});
+
+export const updateProgressSchema = z.object({
+  repairNotes: z.string({ message: 'Repair notes are required' }).trim().min(3, 'Notes must be at least 3 characters'),
+  status: z.nativeEnum(OutageStatus).optional(),
+});
+
+export const restoreOutageSchema = z.object({
+  notes: z.string().trim().max(1000).optional(),
+  actualRestoreTime: z.string().datetime({ message: 'Invalid actualRestoreTime ISO format' }).optional(),
+});
+
 export type CreateOutageInput = z.infer<typeof createOutageSchema>;
 export type UpdateOutageInput = z.infer<typeof updateOutageSchema>;
 export type CancelOutageInput = z.infer<typeof cancelOutageSchema>;
+export type AssignTechnicianInput = z.infer<typeof assignTechnicianSchema>;
+export type UpdateProgressInput = z.infer<typeof updateProgressSchema>;
+export type RestoreOutageInput = z.infer<typeof restoreOutageSchema>;

@@ -12,6 +12,15 @@ const outageRouter = Router();
 // Read operations: Customers, Operators, Admins, and Public (drafts hidden for customers)
 outageRouter.get('/', optionalAuthenticate, OutageController.listOutages);
 outageRouter.get('/:id', optionalAuthenticate, OutageController.getOutageById);
+outageRouter.get('/:id/history', optionalAuthenticate, OutageController.getOutageHistory);
+
+// Assignments list for an outage
+outageRouter.get(
+  '/:id/assignments',
+  authenticateUser,
+  authorizeRoles(Role.POWER_OPERATOR, Role.ADMIN),
+  OutageController.listAssignments,
+);
 
 // Write operations: Strictly POWER_OPERATOR and ADMIN
 outageRouter.post(
@@ -40,6 +49,28 @@ outageRouter.delete(
   authenticateUser,
   authorizeRoles(Role.POWER_OPERATOR, Role.ADMIN),
   OutageController.deleteOutage,
+);
+
+// Workflow operations: Technician assignment, repair progress updates, and restoration
+outageRouter.post(
+  '/:id/assign',
+  authenticateUser,
+  authorizeRoles(Role.POWER_OPERATOR, Role.ADMIN),
+  OutageController.assignTechnician,
+);
+
+outageRouter.patch(
+  '/:id/progress',
+  authenticateUser,
+  authorizeRoles(Role.POWER_OPERATOR, Role.ADMIN),
+  OutageController.updateProgress,
+);
+
+outageRouter.post(
+  '/:id/restore',
+  authenticateUser,
+  authorizeRoles(Role.POWER_OPERATOR, Role.ADMIN),
+  OutageController.restoreOutage,
 );
 
 export default outageRouter;
