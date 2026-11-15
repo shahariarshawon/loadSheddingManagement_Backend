@@ -11,5 +11,7 @@ adminRouter.use(authenticateUser, authorizeRoles(Role.ADMIN));
 adminRouter.get('/users', AdminController.listUsers);
 adminRouter.patch('/users/:id/role', AdminController.updateUserRole);
 adminRouter.patch('/users/:id/status', AdminController.updateUserStatus);
+adminRouter.get('/audit-logs', AdminController.listAuditLogs);
+adminRouter.get('/stats', AdminController.getSystemStats);
 
 export default adminRouter;

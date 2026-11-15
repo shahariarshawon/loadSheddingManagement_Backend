@@ -4,6 +4,7 @@ import {
   listUsersQuerySchema,
   updateRoleSchema,
   updateStatusSchema,
+  listAuditLogsQuerySchema,
 } from './admin.validation.js';
 import { sendSuccess } from '../../utils/response.js';
 import { AppError } from '../../utils/appError.js';
@@ -76,6 +77,34 @@ export class AdminController {
       return sendSuccess(res, 200, {
         message: `User account ${validatedInput.isActive ? 'activated' : 'suspended'} successfully`,
         data: updatedUser,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  static async listAuditLogs(req: Request, res: Response, next: NextFunction) {
+    try {
+      const query = listAuditLogsQuerySchema.parse(req.query);
+      const result = await AdminService.listAuditLogs(query);
+
+      return sendSuccess(res, 200, {
+        message: 'Audit logs retrieved successfully',
+        data: result.auditLogs,
+        meta: result.meta,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  static async getSystemStats(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const stats = await AdminService.getSystemStats();
+
+      return sendSuccess(res, 200, {
+        message: 'System statistics retrieved successfully',
+        data: stats,
       });
     } catch (error) {
       return next(error);
