@@ -38,6 +38,7 @@
     "prisma": "^6.4.1",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "5.8.2",
+    "typescript-eslint": "^8.72.2"
   }
 }
