@@ -69,6 +69,41 @@ export async function authenticateUser(
   }
 }
 
+export async function optionalAuthenticate(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      return next();
+    }
+
+    try {
+      const payload = verifyAccessToken(token);
+      const user = await prisma.user.findFirst({
+        where: { id: payload.userId, deletedAt: null, isActive: true },
+        select: { id: true, email: true, name: true, role: true, areaId: true },
+      });
+      if (user) {
+        req.user = user;
+      }
+    } catch {
+      // Ignore token verification errors for optional auth
+    }
+
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export function authorizeRoles(...allowedRoles: Role[]) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.user) {

@@ -4,6 +4,11 @@ import { sendSuccess } from '../utils/response.js';
 import authRouter from '../modules/auth/auth.routes.js';
 import userRouter from '../modules/user/user.routes.js';
 import adminRouter from '../modules/admin/admin.routes.js';
+import zoneRouter from '../modules/zone/zone.routes.js';
+import substationRouter from '../modules/substation/substation.routes.js';
+import feederRouter from '../modules/feeder/feeder.routes.js';
+import areaRouter from '../modules/area/area.routes.js';
+import outageRouter from '../modules/outage/outage.routes.js';
 
 const apiRouter = Router();
 
@@ -32,5 +37,12 @@ apiRouter.get('/health', async (_req: Request, res: Response, next: NextFunction
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', userRouter);
 apiRouter.use('/admin', adminRouter);
+
+// Phase 4 Modules
+apiRouter.use('/zones', zoneRouter);
+apiRouter.use('/substations', substationRouter);
+apiRouter.use('/feeders', feederRouter);
+apiRouter.use('/areas', areaRouter);
+apiRouter.use('/outages', outageRouter);
 
 export default apiRouter;
