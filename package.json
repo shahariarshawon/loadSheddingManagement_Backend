@@ -9,6 +9,7 @@
     "build": "prisma generate && tsup src/server.ts --format esm --clean",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-runner.ts",
     "lint": "eslint src",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
