@@ -98,6 +98,7 @@ model User {
   subscriptions         Subscription[]
   payments              Payment[]
   auditLogs             AuditLog[]
+  notifications         Notification[]
 
   @@index([email])
   @@index([role])
@@ -241,6 +242,7 @@ model OutageReport {
   area            Area           @relation(fields: [areaId], references: [id], onDelete: Restrict)
   outageId        String?
   outage          Outage?        @relation(fields: [outageId], references: [id], onDelete: SetNull)
+  title           String?
   description     String
   severity        ReportSeverity @default(MEDIUM)
   status          ReportStatus   @default(PENDING)
@@ -331,4 +333,20 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("OUTAGE_UPDATE")
+  isRead    Boolean  @default(false)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }
