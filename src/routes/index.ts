@@ -12,6 +12,8 @@ import outageRouter from '../modules/outage/outage.routes.js';
 import outageReportRouter from '../modules/outageReport/outageReport.routes.js';
 import technicianRouter from '../modules/technician/technician.routes.js';
 import notificationRouter from '../modules/notification/notification.routes.js';
+import paymentRouter from '../modules/payment/payment.routes.js';
+import premiumRouter from '../modules/premium/premium.routes.js';
 
 const apiRouter = Router();
 
@@ -52,5 +54,9 @@ apiRouter.use('/outages', outageRouter);
 apiRouter.use('/outage-reports', outageReportRouter);
 apiRouter.use('/technicians', technicianRouter);
 apiRouter.use('/notifications', notificationRouter);
+
+// Phase 6 Modules: Stripe Payments & Premium Feature Management
+apiRouter.use('/payments', paymentRouter);
+apiRouter.use('/premium', premiumRouter);
 
 export default apiRouter;
