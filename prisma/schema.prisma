@@ -1,0 +1,333 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+enum Role {
+  CUSTOMER
+  POWER_OPERATOR
+  ADMIN
+}
+
+enum OutageType {
+  PLANNED
+  UNEXPECTED
+}
+
+enum OutageStatus {
+  DRAFT
+  PUBLISHED
+  ACTIVE
+  IN_PROGRESS
+  RESTORED
+  COMPLETED
+  CANCELLED
+}
+
+enum ReportSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ReportStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  RESOLVED
+}
+
+enum AssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  RESTORED
+  COMPLETED
+}
+
+enum SubscriptionPlan {
+  MONTHLY_PRIORITY
+  ANNUAL_PRIORITY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+// ----------------------------------------------------
+// MODELS
+// ----------------------------------------------------
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String?
+  phone        String?
+  role         Role      @default(CUSTOMER)
+  areaId       String?
+  isActive     Boolean   @default(true)
+  googleId     String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  // Relations
+  area                  Area?                  @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  refreshTokens         RefreshToken[]
+  customerReports       OutageReport[]         @relation("CustomerReports")
+  verifiedReports       OutageReport[]         @relation("VerifiedReports")
+  createdOutages        Outage[]               @relation("CreatedOutages")
+  technicianAssignments TechnicianAssignment[] @relation("AssignedBy")
+  subscriptions         Subscription[]
+  payments              Payment[]
+  auditLogs             AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([areaId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model Zone {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  substations Substation[]
+  technicians Technician[]
+
+  @@map("zones")
+}
+
+model Substation {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique
+  zoneId      String
+  zone        Zone      @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  capacityKva Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  feeders Feeder[]
+
+  @@index([zoneId])
+  @@map("substations")
+}
+
+model Feeder {
+  id           String    @id @default(uuid())
+  name         String
+  code         String    @unique
+  substationId String
+  substation   Substation @relation(fields: [substationId], references: [id], onDelete: Restrict)
+  maxLoadKw    Float?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  areas Area[]
+
+  @@index([substationId])
+  @@map("feeders")
+}
+
+model Area {
+  id         String    @id @default(uuid())
+  name       String
+  postalCode String?
+  feederId   String
+  feeder     Feeder    @relation(fields: [feederId], references: [id], onDelete: Restrict)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  users         User[]
+  outages       Outage[]
+  outageReports OutageReport[]
+
+  @@index([feederId])
+  @@map("areas")
+}
+
+model Technician {
+  id             String    @id @default(uuid())
+  name           String
+  phone          String
+  specialization String?
+  zoneId         String
+  zone           Zone      @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  isAvailable    Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  assignments TechnicianAssignment[]
+
+  @@index([zoneId])
+  @@index([isAvailable])
+  @@map("technicians")
+}
+
+model Outage {
+  id                 String       @id @default(uuid())
+  outageNumber       String       @unique
+  type               OutageType
+  areaId             String
+  area               Area         @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  title              String
+  description        String?
+  startTime          DateTime
+  endTime            DateTime?
+  status             OutageStatus @default(DRAFT)
+  createdById        String
+  createdBy          User         @relation("CreatedOutages", fields: [createdById], references: [id], onDelete: Restrict)
+  cancellationReason String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  reports     OutageReport[]
+  assignments TechnicianAssignment[]
+
+  @@index([areaId, status])
+  @@index([startTime, endTime])
+  @@index([type, status])
+  @@map("outages")
+}
+
+model OutageReport {
+  id              String         @id @default(uuid())
+  reportNumber    String         @unique
+  customerId      String
+  customer        User           @relation("CustomerReports", fields: [customerId], references: [id], onDelete: Restrict)
+  areaId          String
+  area            Area           @relation(fields: [areaId], references: [id], onDelete: Restrict)
+  outageId        String?
+  outage          Outage?        @relation(fields: [outageId], references: [id], onDelete: SetNull)
+  description     String
+  severity        ReportSeverity @default(MEDIUM)
+  status          ReportStatus   @default(PENDING)
+  verifiedById    String?
+  verifiedBy      User?          @relation("VerifiedReports", fields: [verifiedById], references: [id], onDelete: SetNull)
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([customerId])
+  @@index([areaId, status])
+  @@index([outageId])
+  @@map("outage_reports")
+}
+
+model TechnicianAssignment {
+  id           String           @id @default(uuid())
+  outageId     String
+  outage       Outage           @relation(fields: [outageId], references: [id], onDelete: Cascade)
+  technicianId String
+  technician   Technician       @relation(fields: [technicianId], references: [id], onDelete: Restrict)
+  assignedById String
+  assignedBy   User             @relation("AssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+  status       AssignmentStatus @default(ASSIGNED)
+  repairNotes  String?
+  assignedAt   DateTime         @default(now())
+  restoredAt   DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([outageId])
+  @@index([technicianId, status])
+  @@map("technician_assignments")
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      SubscriptionPlan
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  payments Payment[]
+
+  @@index([userId, status])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  stripeSessionId       String        @unique
+  stripePaymentIntentId String?
+  userId                String
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  subscriptionId        String?
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("USD")
+  status                PaymentStatus @default(PENDING)
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([stripeSessionId])
+  @@index([status])
+  @@map("payments")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
